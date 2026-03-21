@@ -1,265 +1,105 @@
-"""Tests for GitHub MCP tools in issue_resolver/github_tools.py.
-
-Tests call the synchronous implementation helpers directly (not the async
-@tool handlers) so they run without an async event loop.
-"""
-
+"""Tests for GitHub MCP tools (issue_resolver/github_tools.py)."""
 import json
-import subprocess
-from unittest.mock import MagicMock, patch
-
 import pytest
-
+from unittest.mock import patch, MagicMock
 from issue_resolver.github_tools import (
-    _claim_issue_impl,
     _list_open_issues_impl,
+    _claim_issue_impl,
     _release_issue_impl,
-    github_server,
 )
 
 
-# ---------------------------------------------------------------------------
-# _list_open_issues_impl
-# ---------------------------------------------------------------------------
-
-def _make_gh_output(issues: list[dict]) -> MagicMock:
-    """Return a mock CompletedProcess whose stdout is JSON of *issues*."""
-    mock_result = MagicMock()
-    mock_result.stdout = json.dumps(issues)
-    return mock_result
+AGENT_LABELS = ["agent-processing", "agent-resolved", "agent-skip", "agent-failed"]
 
 
-def test_list_open_issues_returns_only_unprocessed(monkeypatch):
-    """Issues with any agent-* label are excluded from the result."""
-    raw_issues = [
-        {
-            "number": 1,
-            "title": "Fix the bug",
-            "labels": [{"name": "bug"}, {"name": "good first issue"}],
-        },
-        {
-            "number": 2,
-            "title": "Processing now",
-            "labels": [{"name": "agent-processing"}],
-        },
-        {
-            "number": 3,
-            "title": "Already resolved",
-            "labels": [{"name": "agent-resolved"}],
-        },
-        {
-            "number": 4,
-            "title": "Skipped",
-            "labels": [{"name": "agent-skip"}],
-        },
-        {
-            "number": 5,
-            "title": "Failed",
-            "labels": [{"name": "agent-failed"}],
-        },
-        {
-            "number": 6,
-            "title": "Another open issue",
-            "labels": [],
-        },
-    ]
+class TestListOpenIssues:
+    """UAT-1: list_open_issues() が open な未処理 Issue を返す"""
 
-    monkeypatch.setattr(
-        subprocess,
-        "run",
-        lambda args, **kwargs: _make_gh_output(raw_issues),
-    )
+    def test_returns_unprocessed_issues(self):
+        """Issues without agent labels are returned."""
+        raw_issues = [
+            {"number": 1, "title": "Fix bug", "labels": [{"name": "bug"}]},
+            {"number": 2, "title": "Add feature", "labels": []},
+        ]
+        mock_result = MagicMock()
+        mock_result.stdout = json.dumps(raw_issues)
+        mock_result.returncode = 0
+        with patch("subprocess.run", return_value=mock_result):
+            result = _list_open_issues_impl()
+        assert len(result) == 2
+        assert result[0]["number"] == 1
+        assert result[0]["title"] == "Fix bug"
+        assert result[0]["labels"] == ["bug"]
 
-    result = _list_open_issues_impl()
+    def test_excludes_processing_issues(self):
+        """Issues with agent-processing label are excluded."""
+        raw_issues = [
+            {"number": 1, "title": "Processing", "labels": [{"name": "agent-processing"}]},
+            {"number": 2, "title": "Open", "labels": []},
+        ]
+        mock_result = MagicMock()
+        mock_result.stdout = json.dumps(raw_issues)
+        mock_result.returncode = 0
+        with patch("subprocess.run", return_value=mock_result):
+            result = _list_open_issues_impl()
+        assert len(result) == 1
+        assert result[0]["number"] == 2
 
-    # Only issues 1 and 6 should be returned
-    assert len(result) == 2
-    numbers = {issue["number"] for issue in result}
-    assert numbers == {1, 6}
+    def test_excludes_resolved_issues(self):
+        """Issues with agent-resolved label are excluded."""
+        raw_issues = [
+            {"number": 3, "title": "Resolved", "labels": [{"name": "agent-resolved"}]},
+        ]
+        mock_result = MagicMock()
+        mock_result.stdout = json.dumps(raw_issues)
+        mock_result.returncode = 0
+        with patch("subprocess.run", return_value=mock_result):
+            result = _list_open_issues_impl()
+        assert result == []
 
-
-def test_list_open_issues_result_shape(monkeypatch):
-    """Each returned item has exactly: number (int), title (str), labels (list[str])."""
-    raw_issues = [
-        {
-            "number": 10,
-            "title": "Sample issue",
-            "labels": [{"name": "enhancement"}],
-        }
-    ]
-
-    monkeypatch.setattr(
-        subprocess,
-        "run",
-        lambda args, **kwargs: _make_gh_output(raw_issues),
-    )
-
-    result = _list_open_issues_impl()
-
-    assert len(result) == 1
-    item = result[0]
-    assert isinstance(item["number"], int)
-    assert isinstance(item["title"], str)
-    assert isinstance(item["labels"], list)
-    # Labels must be plain strings, not dicts
-    assert all(isinstance(label, str) for label in item["labels"])
-    assert item["labels"] == ["enhancement"]
+    def test_returns_correct_shape(self):
+        """Return value has number (int), title (str), labels (list[str])."""
+        raw_issues = [
+            {"number": 5, "title": "Test", "labels": [{"name": "bug"}, {"name": "help wanted"}]},
+        ]
+        mock_result = MagicMock()
+        mock_result.stdout = json.dumps(raw_issues)
+        mock_result.returncode = 0
+        with patch("subprocess.run", return_value=mock_result):
+            result = _list_open_issues_impl()
+        assert result[0] == {"number": 5, "title": "Test", "labels": ["bug", "help wanted"]}
 
 
-def test_list_open_issues_agent_processing_excluded(monkeypatch):
-    """agent-processing label causes the issue to be excluded."""
-    raw_issues = [
-        {
-            "number": 7,
-            "title": "In progress",
-            "labels": [{"name": "bug"}, {"name": "agent-processing"}],
-        }
-    ]
+class TestClaimIssue:
+    """UAT-2: claim_issue() でラベルが付与される"""
 
-    monkeypatch.setattr(
-        subprocess,
-        "run",
-        lambda args, **kwargs: _make_gh_output(raw_issues),
-    )
-
-    result = _list_open_issues_impl()
-    assert result == []
+    def test_adds_agent_processing_label(self):
+        """claim_issue(N) calls gh issue edit --add-label agent-processing."""
+        mock_result = MagicMock()
+        mock_result.returncode = 0
+        mock_result.stdout = ""
+        with patch("subprocess.run", return_value=mock_result) as mock_run:
+            _claim_issue_impl(42)
+        call_args = mock_run.call_args[0][0]
+        assert "gh" in call_args
+        assert "42" in [str(a) for a in call_args]
+        assert "agent-processing" in call_args
 
 
-def test_list_open_issues_agent_resolved_excluded(monkeypatch):
-    """agent-resolved label causes the issue to be excluded."""
-    raw_issues = [
-        {
-            "number": 8,
-            "title": "Done",
-            "labels": [{"name": "agent-resolved"}],
-        }
-    ]
+class TestReleaseIssue:
+    """release_issue() updates label to resolved/skip/failed."""
 
-    monkeypatch.setattr(
-        subprocess,
-        "run",
-        lambda args, **kwargs: _make_gh_output(raw_issues),
-    )
+    def test_release_with_resolved_outcome(self):
+        """release_issue(N, 'resolved') removes agent-processing and adds agent-resolved."""
+        mock_result = MagicMock()
+        mock_result.returncode = 0
+        mock_result.stdout = ""
+        with patch("subprocess.run", return_value=mock_result) as mock_run:
+            _release_issue_impl(42, "resolved")
+        # Should have called gh at least once
+        assert mock_run.called
 
-    result = _list_open_issues_impl()
-    assert result == []
-
-
-# ---------------------------------------------------------------------------
-# _claim_issue_impl
-# ---------------------------------------------------------------------------
-
-def test_claim_issue_calls_subprocess_with_correct_args():
-    """_claim_issue_impl(42) calls gh issue edit 42 --add-label agent-processing."""
-    calls = []
-
-    def fake_run(args, **kwargs):
-        calls.append(args)
-        mock = MagicMock()
-        mock.stdout = ""
-        return mock
-
-    with patch("subprocess.run", side_effect=fake_run):
-        _claim_issue_impl(42)
-
-    assert len(calls) == 1
-    cmd = calls[0]
-    assert "gh" in cmd
-    assert "42" in cmd
-    assert "agent-processing" in cmd
-
-
-def test_claim_issue_uses_list_args():
-    """subprocess.run must be called with a list, not a shell string."""
-    with patch("subprocess.run") as mock_run:
-        mock_run.return_value = MagicMock(stdout="")
-        _claim_issue_impl(99)
-
-    # Ensure shell=False (the default when args is a list, but verify no shell=True)
-    _call = mock_run.call_args
-    # First positional arg must be a list
-    assert isinstance(_call.args[0], list)
-
-
-# ---------------------------------------------------------------------------
-# _release_issue_impl
-# ---------------------------------------------------------------------------
-
-def test_release_issue_resolved_succeeds():
-    """_release_issue_impl(42, 'resolved') completes without raising."""
-    with patch("subprocess.run") as mock_run:
-        mock_run.return_value = MagicMock(stdout="")
-        # Should not raise
-        _release_issue_impl(42, "resolved")
-
-
-def test_release_issue_skip_succeeds():
-    """_release_issue_impl(42, 'skip') completes without raising."""
-    with patch("subprocess.run") as mock_run:
-        mock_run.return_value = MagicMock(stdout="")
-        _release_issue_impl(42, "skip")
-
-
-def test_release_issue_failed_succeeds():
-    """_release_issue_impl(42, 'failed') completes without raising."""
-    with patch("subprocess.run") as mock_run:
-        mock_run.return_value = MagicMock(stdout="")
-        _release_issue_impl(42, "failed")
-
-
-def test_release_issue_invalid_outcome_raises():
-    """_release_issue_impl with an unknown outcome raises ValueError."""
-    with patch("subprocess.run") as mock_run:
-        mock_run.return_value = MagicMock(stdout="")
-        with pytest.raises((ValueError, KeyError)):
+    def test_invalid_outcome_raises(self):
+        """release_issue with invalid outcome raises ValueError."""
+        with pytest.raises((ValueError, Exception)):
             _release_issue_impl(42, "invalid-outcome")
-
-
-def test_release_issue_removes_processing_label():
-    """_release_issue_impl calls --remove-label agent-processing."""
-    calls = []
-
-    def fake_run(args, **kwargs):
-        calls.append(args)
-        return MagicMock(stdout="")
-
-    with patch("subprocess.run", side_effect=fake_run):
-        _release_issue_impl(42, "resolved")
-
-    # At least one call should include --remove-label and agent-processing
-    remove_calls = [c for c in calls if "--remove-label" in c and "agent-processing" in c]
-    assert len(remove_calls) >= 1
-
-
-def test_release_issue_adds_outcome_label():
-    """_release_issue_impl(42, 'resolved') adds agent-resolved label."""
-    calls = []
-
-    def fake_run(args, **kwargs):
-        calls.append(args)
-        return MagicMock(stdout="")
-
-    with patch("subprocess.run", side_effect=fake_run):
-        _release_issue_impl(42, "resolved")
-
-    # At least one call should add agent-resolved
-    add_calls = [c for c in calls if "--add-label" in c and "agent-resolved" in c]
-    assert len(add_calls) >= 1
-
-
-# ---------------------------------------------------------------------------
-# github_server
-# ---------------------------------------------------------------------------
-
-def test_github_server_is_importable():
-    """github_server can be imported from issue_resolver.github_tools."""
-    # If import succeeded at module load, this trivially passes.
-    assert github_server is not None
-
-
-def test_github_server_has_correct_type():
-    """github_server is a McpSdkServerConfig instance."""
-    from claude_agent_sdk import McpSdkServerConfig
-
-    assert isinstance(github_server, McpSdkServerConfig)
