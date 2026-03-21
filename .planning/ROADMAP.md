@@ -35,7 +35,7 @@
 **Plans:** 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Wave 0 test scaffold: pytest setup + 3 test files with failing tests
+- [x] 01-01-PLAN.md — Wave 0 test scaffold: pytest setup + 3 test files with failing tests
 - [ ] 01-02-PLAN.md — IssueContext dataclass + validate_pre_pr gate function (TDD)
 - [ ] 01-03-PLAN.md — GitHub MCP tools: 6 gh CLI wrappers + create_sdk_mcp_server (TDD)
 - [ ] 01-04-PLAN.md — AgentBase + module skeleton stubs + main.py ClaudeSDKClient update

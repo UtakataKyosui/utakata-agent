@@ -3,8 +3,11 @@
 ## Current Status
 
 **Milestone:** 1 — issue-resolver
-**Phase:** Ready to start Phase 1
-**Last Updated:** 2026-03-22
+**Phase:** 01-pipeline-skeleton-safety (In Progress)
+**Current Plan:** 01-02 of 4
+**Last Updated:** 2026-03-21
+**Last Session:** 2026-03-21T16:19:45Z
+**Stopped At:** Completed 01-01-PLAN.md
 
 ## Completed Work
 
@@ -15,10 +18,12 @@
 - [x] `.planning/research/SUMMARY.md` created
 - [x] `.planning/REQUIREMENTS.md` created
 - [x] `.planning/ROADMAP.md` created (6 phases)
+- [x] Phase 1 plans created (4 plans: 01-01 through 01-04)
+- [x] **01-01-PLAN.md** — Wave 0 test scaffold: pytest + 3 failing test files + issue_resolver package
 
 ## Next Action
 
-Run `/gsd:plan-phase 1` to create the detailed implementation plan for Phase 1.
+Execute plan 01-02: IssueContext dataclass + validate_pre_pr gate function (TDD)
 
 ## Key Decisions Made
 
@@ -28,6 +33,7 @@ Run `/gsd:plan-phase 1` to create the detailed implementation plan for Phase 1.
 4. **GitHub MCP Server first** — All agents depend on it; build in Phase 1
 5. **Process one issue per run** — GitHub token rate limit (1,000 req/hour)
 6. **Label locking** — `agent-processing` → `agent-resolved/skip/failed` lifecycle
+7. **`issue_resolver/` (underscore not hyphen)** — Python cannot import hyphenated package names; directory named issue_resolver/ for importability
 
 ## Architecture Decisions
 
