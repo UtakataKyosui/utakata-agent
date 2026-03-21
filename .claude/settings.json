@@ -1,0 +1,5 @@
+{
+    "plansDirectory": "./.claude/plan",
+    "autoMemoryDirectory": "./.claude/memory",
+    "autoMemoryEnabled": true
+}
