@@ -1,0 +1,16 @@
+{
+  "mode": "supervised",
+  "granularity": "standard",
+  "execution": "sequential",
+  "git_tracking": true,
+  "research": true,
+  "plan_check": true,
+  "verifier": true,
+  "models": {
+    "researcher": "sonnet",
+    "planner": "sonnet",
+    "executor": "sonnet",
+    "reviewer": "sonnet"
+  },
+  "created_at": "2026-03-22"
+}
