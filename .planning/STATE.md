@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_plan: 01-04 of 4
-status: unknown
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-03-21T16:22:14.871Z"
+status: phase-complete
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-03-21T16:25:37Z"
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -18,11 +18,11 @@ progress:
 ## Current Status
 
 **Milestone:** 1 — issue-resolver
-**Phase:** 01-pipeline-skeleton-safety (In Progress)
-**Current Plan:** 01-04 of 4
-**Last Updated:** 2026-03-22
-**Last Session:** 2026-03-21T16:22:14.869Z
-**Stopped At:** Completed 01-02-PLAN.md
+**Phase:** 01-pipeline-skeleton-safety (Complete)
+**Current Plan:** 01-04 of 4 (All Complete)
+**Last Updated:** 2026-03-21
+**Last Session:** 2026-03-21T16:25:37Z
+**Stopped At:** Completed 01-04-PLAN.md
 
 ## Completed Work
 
@@ -37,10 +37,11 @@ progress:
 - [x] **01-01-PLAN.md** — Wave 0 test scaffold: pytest + 3 failing test files + issue_resolver package
 - [x] **01-02-PLAN.md** — IssueContext dataclass + validate_pre_pr() 4-condition safety gate (TDD, 16 tests passing)
 - [x] **01-03-PLAN.md** — GitHub MCP tools: 6 @tool handlers, github_server McpSdkServerConfig, shell=False subprocess, AGENT_LABELS filtering
+- [x] **01-04-PLAN.md** — AgentBase with bypassPermissions + SubagentStart/SubagentStop hooks; module skeleton (analyzer/specialist/reviewer stubs); run.py entry point; main.py updated from query() to ClaudeSDKClient architecture
 
 ## Next Action
 
-Execute plan 01-04: AgentBase + ClaudeSDKClient integration (TDD)
+Phase 1 complete. Execute Phase 2: Analyzer agent implementation.
 
 ## Key Decisions Made
 
@@ -55,6 +56,8 @@ Execute plan 01-04: AgentBase + ClaudeSDKClient integration (TDD)
 9. **McpSdkServerConfig is TypedDict (runtime: dict)** — isinstance check raises TypeError; type() returns dict as expected; confirmed via smoke-test
 10. **Optional[bool] = None for review_passed** — None means not-yet-reviewed (abort); False means explicitly rejected; True means approved
 11. **validate_pre_pr 4-condition order locked** — scope check → test modification → bandit → token budget; order matches CONTEXT.md specification
+12. **AgentBase._make_options() centralizes hook wiring** — HookMatcher(hooks=[callback]) pattern confirmed against installed SDK; all agents get SubagentStart/SubagentStop logging for free
+13. **run.py releases as "skip" during skeleton phase** — prevents agent-processing label lock when pipeline executes before Phase 2-4 agents are implemented
 
 ## Architecture Decisions
 
