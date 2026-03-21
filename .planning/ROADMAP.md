@@ -32,7 +32,7 @@
 - `IssueContext` が JSON にシリアライズ/デシリアライズできる
 - 4つの hard abort 条件がそれぞれ独立してトリガーされる
 
-**Plans:** 4 plans
+**Plans:** 2/4 plans executed
 
 Plans:
 - [x] 01-01-PLAN.md — Wave 0 test scaffold: pytest setup + 3 test files with failing tests
@@ -162,8 +162,7 @@ Plans:
 
 | Phase | Goal | Key Output |
 |-------|------|-----------|
-| 1 | 安全基盤 | `IssueContext`, GitHub MCP, ClaudeSDKClient 骨格 |
-| 2 | Issue 分析 | Analyzer Agent + 影響ファイル特定 |
+| 1 | 2/4 | In Progress|  | 2 | Issue 分析 | Analyzer Agent + 影響ファイル特定 |
 | 3 | 専門実装 | BugFixer / FeatureDev / Refactorer |
 | 4 | レビュー | Reviewer Agent + Pre-PR ゲート |
 | 5 | 実行環境 | PR Creator + GitHub Actions workflow |
