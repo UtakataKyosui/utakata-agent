@@ -63,6 +63,14 @@ Plans:
 - 影響ファイル15件超の Issue は `complexity_score > 8` になる
 - Analyzer がファイルを変更しない（Read 系ツールのみ使用）
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Wave 0 TDD test scaffold: tests/test_analyzer.py with all failing tests
+- [ ] 02-02-PLAN.md — Pure helper functions: body fetch, prompt builder, label mapping, complexity score
+- [ ] 02-03-PLAN.md — AnalyzerAgent.run() implementation with ClaudeSDKClient + output_format
+- [ ] 02-04-PLAN.md — Pipeline wiring: run.py calls Analyzer + skip-score handling
+
 ---
 
 ## Phase 3: 専門エージェント群（BugFixer / FeatureDev / Refactorer）
