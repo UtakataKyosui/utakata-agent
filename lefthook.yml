@@ -1,0 +1,8 @@
+pre-commit:
+  commands:
+    lint:
+      files: git ls-files -- agents/new-idea-agents | sed 's|agents/new-idea-agents/||'
+      run: cd agents/new-idea-agents && bunx eslint --no-warn-ignored {files}
+    format-check:
+      files: git ls-files -- agents/new-idea-agents | grep -E '\.(ts|js|json|md)$' | sed 's|agents/new-idea-agents/||'
+      run: cd agents/new-idea-agents && bunx prettier --check {files}

@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,js,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "postinstall": "lefthook install"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -19,6 +20,7 @@
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.4.0",
     "jiti": "^2.6.1",
+    "lefthook": "^2.1.4",
     "prettier": "3.8.1",
     "typescript-eslint": "^8.57.1"
   },
