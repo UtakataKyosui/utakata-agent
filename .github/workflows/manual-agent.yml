@@ -1,0 +1,51 @@
+name: Manual Agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'コマンド'
+        required: true
+        type: choice
+        options:
+          - ask
+          - chat
+          - meal
+      prompt:
+        description: 'プロンプト / 質問内容'
+        required: true
+        type: string
+      constraint:
+        description: '制約条件（meal コマンド用: 例「糖質制限」「野菜多め」）'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+        working-directory: agents/new-idea-agents
+
+      - name: Run Agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        working-directory: agents/new-idea-agents
+        run: |
+          CMD="${{ inputs.command }}"
+          PROMPT="${{ inputs.prompt }}"
+          CONSTRAINT="${{ inputs.constraint }}"
+
+          if [ "$CMD" = "meal" ] && [ -n "$CONSTRAINT" ]; then
+            bun index.ts meal "$PROMPT" --constraint "$CONSTRAINT"
+          else
+            bun index.ts "$CMD" "$PROMPT"
+          fi

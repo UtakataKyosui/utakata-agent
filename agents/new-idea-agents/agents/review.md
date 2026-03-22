@@ -34,3 +34,16 @@ PR URL: {{url}}
 - **Issues**: 問題点（重大度: Critical/Major/Minor）
 - **Suggestions**: 改善提案
 - **Verdict**: Approve / Request Changes / Comment
+
+**レビュー完了後の投稿手順（GitHub Actions / CI 環境での実行時）**:
+`GITHUB_ACTIONS` 環境変数が設定されている場合は以下で結果を PR に投稿してください：
+```bash
+# Approve の場合
+gh pr review "{{url}}" --approve --body "<上記レビュー内容>"
+
+# Request Changes の場合
+gh pr review "{{url}}" --request-changes --body "<上記レビュー内容>"
+
+# Comment のみの場合
+gh pr review "{{url}}" --comment --body "<上記レビュー内容>"
+```

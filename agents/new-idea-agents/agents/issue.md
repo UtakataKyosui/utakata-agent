@@ -28,9 +28,28 @@ subagents:
 2. `code-analyzer` サブエージェントを使ってコードベースを調査する
 3. `fix-planner` サブエージェントを使って修正方針を確認する
 4. 最小限の変更で問題を修正する
-5. 修正内容を説明する
+5. 修正が完了したら PR を作成する（GitHub Actions 環境の場合）
 
 Issue URL: {{url}}
+
+**修正完了後の PR 作成手順（GitHub Actions / CI 環境での実行時）**:
+`GITHUB_ACTIONS` 環境変数が設定されている場合は以下を実行してください：
+```bash
+# Issue 番号を URL から取得（例: URL末尾の数値）
+ISSUE_NUM=$(echo "{{url}}" | grep -oE '[0-9]+$')
+BRANCH="fix/issue-${ISSUE_NUM}"
+
+git config user.email "github-actions[bot]@users.noreply.github.com"
+git config user.name "github-actions[bot]"
+git checkout -b "$BRANCH"
+git add -A
+git commit -m "fix: resolve issue #${ISSUE_NUM}"
+git push origin "$BRANCH"
+gh pr create \
+  --title "fix: resolve issue #${ISSUE_NUM}" \
+  --body "Closes #${ISSUE_NUM}" \
+  --head "$BRANCH"
+```
 
 ## SubAgents
 
