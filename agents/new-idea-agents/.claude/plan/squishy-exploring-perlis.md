@@ -7,6 +7,7 @@ Issue が開かれたら自動解決 PR を作成、PR が開かれたらレビ�
 まず現状の変更をコミットしてから、GHA 対応の修正を行う。
 
 **SDK の確認済み前提**:
+
 - `@anthropic-ai/claude-agent-sdk` v0.2.81 に Claude Code バイナリ (cli.js) が埋め込み済み
 - 別途 `claude` CLI のインストール不要
 - `bun install` だけで動作
@@ -26,6 +27,7 @@ agents/ask.md, agents/chat.md, agents/issue.md, agents/review.md, agents/meal.md
 ```
 
 コミットメッセージ:
+
 ```
 feat: add Claude Agent SDK-based CLI with agent definition system
 
@@ -57,6 +59,7 @@ GHA で自動 PR 作成ができるよう、以下の指示を追加：
 ```markdown
 **GitHub Actions での動作**:
 修正完了後は以下の手順を実行してください：
+
 1. `git checkout -b fix/issue-<番号>`
 2. `git add -A && git commit -m "fix: <修正内容> (closes #<番号>)"`
 3. `gh pr create --title "fix: <修正内容>" --body "Closes #<Issue番号>"`
@@ -160,16 +163,16 @@ on:
   workflow_dispatch:
     inputs:
       command:
-        description: 'コマンド (ask / chat / meal)'
+        description: "コマンド (ask / chat / meal)"
         required: true
         type: choice
         options: [ask, chat, meal]
       prompt:
-        description: 'プロンプト / 質問内容'
+        description: "プロンプト / 質問内容"
         required: true
         type: string
       constraint:
-        description: '制約 (meal コマンド用)'
+        description: "制約 (meal コマンド用)"
         required: false
         type: string
 
@@ -214,8 +217,8 @@ GitHub Actions のセットアップ方法を追記：
 
 リポジトリの Settings > Secrets and variables > Actions に設定:
 
-| シークレット名 | 説明 |
-|--------------|------|
+| シークレット名      | 説明               |
+| ------------------- | ------------------ |
 | `ANTHROPIC_API_KEY` | Anthropic API キー |
 
 ### 自動実行
@@ -229,15 +232,15 @@ GitHub Actions のセットアップ方法を追記：
 
 ## 変更が必要なファイル一覧
 
-| ファイル | 操作 | 内容 |
-|---------|------|------|
-| `package.json` | 修正 | scripts フィールドを追加 |
-| `agents/issue.md` | 修正 | 自動 PR 作成の指示を追加 |
-| `agents/review.md` | 修正 | PR コメント投稿の指示を追加 |
-| `.github/workflows/issue-resolver.yml` | 新規 | Issue 自動解決ワークフロー |
-| `.github/workflows/pr-reviewer.yml` | 新規 | PR 自動レビューワークフロー |
-| `.github/workflows/manual-agent.yml` | 新規 | 手動実行ワークフロー |
-| `README.md` | 修正 | GHA セットアップ説明を追加 |
+| ファイル                               | 操作 | 内容                        |
+| -------------------------------------- | ---- | --------------------------- |
+| `package.json`                         | 修正 | scripts フィールドを追加    |
+| `agents/issue.md`                      | 修正 | 自動 PR 作成の指示を追加    |
+| `agents/review.md`                     | 修正 | PR コメント投稿の指示を追加 |
+| `.github/workflows/issue-resolver.yml` | 新規 | Issue 自動解決ワークフロー  |
+| `.github/workflows/pr-reviewer.yml`    | 新規 | PR 自動レビューワークフロー |
+| `.github/workflows/manual-agent.yml`   | 新規 | 手動実行ワークフロー        |
+| `README.md`                            | 修正 | GHA セットアップ説明を追加  |
 
 ---
 

@@ -7,6 +7,7 @@ args:
     required: true
     positional: true
 ---
+
 あなたは親切で知識豊富なアシスタントです。
 以下の質問に簡潔かつ正確に答えてください。
 

@@ -5,14 +5,21 @@
   "private": true,
   "scripts": {
     "start": "bun index.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\""
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/bun": "latest",
     "@types/yargs": "^17.0.35",
     "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
     "globals": "^17.4.0",
+    "jiti": "^2.6.1",
+    "prettier": "3.8.1",
     "typescript-eslint": "^8.57.1"
   },
   "peerDependencies": {

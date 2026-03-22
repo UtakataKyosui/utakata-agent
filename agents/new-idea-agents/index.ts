@@ -8,18 +8,13 @@ import { streamOutput } from "./stream";
 
 // ─── エージェント実行 ─────────────────────────────────────────────────
 
-async function runAgent(
-  config: AgentConfig,
-  argv: Record<string, unknown>,
-): Promise<void> {
+async function runAgent(config: AgentConfig, argv: Record<string, unknown>): Promise<void> {
   const prompt = buildPrompt(config, argv);
 
   const q = query({
     prompt,
     options: {
-      cwd: config.hasCwd
-        ? String(argv["cwd"] ?? process.cwd())
-        : undefined,
+      cwd: config.hasCwd ? String(argv["cwd"] ?? process.cwd()) : undefined,
       permissionMode: config.permissionMode ?? "default",
       ...(config.tools ? { allowedTools: config.tools } : {}),
       ...(config.subagents ? { agents: config.subagents } : {}),
@@ -28,7 +23,7 @@ async function runAgent(
 
   try {
     await streamOutput(q);
-  } catch (err) {
+  } catch {
     process.exit(1);
   }
 }
@@ -46,10 +41,7 @@ function buildCommandSignature(name: string, config: AgentConfig): string {
 
 // ─── yargs にオプション引数を登録する ────────────────────────────────
 
-function registerArgs(
-  y: ReturnType<typeof yargs>,
-  config: AgentConfig,
-): ReturnType<typeof yargs> {
+function registerArgs(y: ReturnType<typeof yargs>, config: AgentConfig): ReturnType<typeof yargs> {
   for (const arg of config.args ?? []) {
     if (arg.positional) {
       y.positional(arg.name, {
@@ -90,8 +82,8 @@ async function main() {
   const cli = yargs(hideBin(process.argv))
     .scriptName("agent")
     .usage("$0 <command> [options]")
-    .example("$0 ask \"TypeScriptとは？\"", "ワンショット質問")
-    .example("$0 meal \"夕食\" --constraint \"糖質制限\"", "食事提案")
+    .example('$0 ask "TypeScriptとは？"', "ワンショット質問")
+    .example('$0 meal "夕食" --constraint "糖質制限"', "食事提案")
     .example("$0 issue https://github.com/org/repo/issues/1 --cwd ./repo", "Issue解決")
     .example("$0 review https://github.com/org/repo/pull/42", "PRレビュー")
     .strict()

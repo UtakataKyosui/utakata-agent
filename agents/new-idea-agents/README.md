@@ -45,6 +45,7 @@ args:
     required: true
     positional: true
 ---
+
 あなたは{{input}}を処理するエージェントです。
 ```
 
@@ -60,16 +61,16 @@ bun test
 
 リポジトリの **Settings > Secrets and variables > Actions** に設定:
 
-| シークレット名 | 説明 |
-|--------------|------|
+| シークレット名      | 説明               |
+| ------------------- | ------------------ |
 | `ANTHROPIC_API_KEY` | Anthropic API キー |
 
 `GITHUB_TOKEN` は自動で提供されます。
 
 ### 自動実行ワークフロー
 
-| ワークフロー | トリガー | 動作 |
-|------------|---------|------|
-| `issue-resolver.yml` | Issue 作成時 / `/resolve` コメント | 自動修正して PR 作成 |
-| `pr-reviewer.yml` | PR 作成・更新時 | レビューコメントを PR に投稿 |
-| `manual-agent.yml` | Actions タブから手動実行 | ask / chat / meal を実行 |
+| ワークフロー         | トリガー                           | 動作                         |
+| -------------------- | ---------------------------------- | ---------------------------- |
+| `issue-resolver.yml` | Issue 作成時 / `/resolve` コメント | 自動修正して PR 作成         |
+| `pr-reviewer.yml`    | PR 作成・更新時                    | レビューコメントを PR に投稿 |
+| `manual-agent.yml`   | Actions タブから手動実行           | ask / chat / meal を実行     |

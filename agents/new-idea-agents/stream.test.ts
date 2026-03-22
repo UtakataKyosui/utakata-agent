@@ -19,7 +19,12 @@ function makeAssistantMessage(text: string): SDKMessage {
       model: "claude-sonnet-4-6",
       stop_reason: "end_turn",
       stop_sequence: null,
-      usage: { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
+      usage: {
+        input_tokens: 0,
+        output_tokens: 0,
+        cache_creation_input_tokens: 0,
+        cache_read_input_tokens: 0,
+      },
       content: [{ type: "text", text }],
     },
   } as SDKMessage;
@@ -78,12 +83,7 @@ test("複数の assistant メッセージを順番に出力する", async () => 
     return true;
   });
 
-  await streamOutput(
-    makeMessages(
-      makeAssistantMessage("first"),
-      makeAssistantMessage("second"),
-    ),
-  );
+  await streamOutput(makeMessages(makeAssistantMessage("first"), makeAssistantMessage("second")));
 
   expect(written.join("")).toContain("first");
   expect(written.join("")).toContain("second");

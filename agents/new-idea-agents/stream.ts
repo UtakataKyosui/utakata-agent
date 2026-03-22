@@ -5,9 +5,7 @@ import type { SDKMessage } from "@anthropic-ai/claude-agent-sdk";
  * assistant メッセージのテキストを stdout にストリーミング出力する。
  * エラー結果の場合は stderr に書いてエラーをスローする。
  */
-export async function streamOutput(
-  messages: AsyncIterable<SDKMessage>,
-): Promise<void> {
+export async function streamOutput(messages: AsyncIterable<SDKMessage>): Promise<void> {
   for await (const message of messages) {
     if (message.type === "assistant") {
       for (const block of message.message.content) {

@@ -3,12 +3,7 @@ import { join, basename, extname } from "node:path";
 import { homedir } from "node:os";
 import type { AgentDefinition } from "@anthropic-ai/claude-agent-sdk";
 
-export type PermissionMode =
-  | "default"
-  | "acceptEdits"
-  | "bypassPermissions"
-  | "plan"
-  | "dontAsk";
+export type PermissionMode = "default" | "acceptEdits" | "bypassPermissions" | "plan" | "dontAsk";
 
 export type ArgDefinition = {
   name: string;
@@ -56,10 +51,16 @@ function parseFrontMatter(text: string): FrontMatter {
 
   while (i < lines.length) {
     const line = lines[i];
-    if (!line.trim() || line.trim().startsWith("#")) { i++; continue; }
+    if (!line.trim() || line.trim().startsWith("#")) {
+      i++;
+      continue;
+    }
 
     const colonIdx = line.indexOf(":");
-    if (colonIdx === -1) { i++; continue; }
+    if (colonIdx === -1) {
+      i++;
+      continue;
+    }
 
     const key = line.slice(0, colonIdx).trim();
     const value = line.slice(colonIdx + 1).trim();
@@ -137,9 +138,7 @@ function parseFrontMatter(text: string): FrontMatter {
  * システムプロンプト本文
  * ```
  */
-function parseSubAgents(
-  body: string,
-): Record<string, AgentDefinition> | undefined {
+function parseSubAgents(body: string): Record<string, AgentDefinition> | undefined {
   const subAgentSectionMatch = body.match(/^## SubAgents\s*\n([\s\S]*)/m);
   if (!subAgentSectionMatch) return undefined;
 
@@ -156,7 +155,7 @@ function parseSubAgents(
 
     let description = "";
     let tools: string[] | undefined;
-    let promptLines: string[] = [];
+    const promptLines: string[] = [];
     let inMeta = true;
 
     for (let i = 1; i < lines.length; i++) {
@@ -168,7 +167,11 @@ function parseSubAgents(
           const k = metaLine.slice(0, ci).trim();
           const v = metaLine.slice(ci + 1).trim();
           if (k === "description") description = v;
-          else if (k === "tools") tools = v.split(",").map((t) => t.trim()).filter(Boolean);
+          else if (k === "tools")
+            tools = v
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean);
         }
       } else {
         inMeta = false;
@@ -219,10 +222,7 @@ export function parseAgentFile(content: string): AgentConfig {
  * - `{{変数名}}` をargvの対応する値で展開する
  * - `ask` コマンドなど positional な引数を持たない場合は末尾に追加する
  */
-export function buildPrompt(
-  config: AgentConfig,
-  argv: Record<string, unknown>,
-): string {
+export function buildPrompt(config: AgentConfig, argv: Record<string, unknown>): string {
   let prompt = config.systemPrompt;
 
   // テンプレート変数を展開
@@ -268,9 +268,7 @@ export function buildPrompt(
  * 指定されたパスから .md ファイルを読み込み、AgentConfig の Map を返す。
  * 後のパスが同名エージェントを上書きする（ユーザー定義が組み込みを上書き）。
  */
-export async function discoverAgents(
-  searchPaths: string[],
-): Promise<Map<string, AgentConfig>> {
+export async function discoverAgents(searchPaths: string[]): Promise<Map<string, AgentConfig>> {
   const result = new Map<string, AgentConfig>();
 
   for (const dirPath of searchPaths) {
@@ -303,8 +301,8 @@ export async function discoverAgents(
  */
 export function defaultSearchPaths(projectRoot: string): string[] {
   return [
-    join(import.meta.dir, "agents"),           // 組み込み
-    join(projectRoot, ".claude", "agents"),     // プロジェクトレベル
-    join(homedir(), ".claude", "agents"),       // ユーザーレベル
+    join(import.meta.dir, "agents"), // 組み込み
+    join(projectRoot, ".claude", "agents"), // プロジェクトレベル
+    join(homedir(), ".claude", "agents"), // ユーザーレベル
   ];
 }
